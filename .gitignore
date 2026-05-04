@@ -1,0 +1,8 @@
+# binaries
+sendr
+sendr.exe
+
+# Go build output
+*.exe
+*.out
+*.bin
