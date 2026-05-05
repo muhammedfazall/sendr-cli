@@ -7,10 +7,8 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"runtime"
-	"sync"
 	"time"
 )
 
@@ -30,36 +28,16 @@ func Login(apiURL string) (string, error) {
 	port := listener.Addr().(*net.TCPAddr).Port
 
 	server := &http.Server{}
-	jar := newCookieJar()
 
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
-		// Store cookies from this request
-		jar.SetCookies(r.URL, r.Cookies())
-
-		// Fetch the token from /auth/token using the cookie
-		client := &http.Client{
-			Jar:     jar,
-			Timeout: 10 * time.Second,
-		}
-		resp, err := client.Get(apiURL + "/auth/token")
-		if err != nil {
-			errCh <- fmt.Errorf("fetch token failed: %w", err)
-			fmt.Fprintf(w, "<html><body><h2>Authentication failed. You can close this tab.</h2></body></html>")
-			return
-		}
-		defer resp.Body.Close()
-
-		// Parse token from JSON response
-		var result struct {
-			Token string `json:"token"`
-		}
-		if err := parseJSON(resp.Body, &result); err != nil || result.Token == "" {
-			errCh <- fmt.Errorf("invalid token response")
+		token := r.URL.Query().Get("token")
+		if token == "" {
+			errCh <- fmt.Errorf("no token in callback")
 			fmt.Fprintf(w, "<html><body><h2>Authentication failed. You can close this tab.</h2></body></html>")
 			return
 		}
 
-		tokenCh <- result.Token
+		tokenCh <- token
 		fmt.Fprintf(w, "<html><body><h2>Authenticated! You can close this tab.</h2></body></html>")
 	})
 
@@ -109,28 +87,6 @@ func openBrowser(url string) error {
 	}
 
 	return exec.Command(cmd, args...).Start()
-}
-
-// minimal cookie jar
-type cookieJar struct {
-	mu      sync.Mutex
-	cookies map[string][]*http.Cookie
-}
-
-func newCookieJar() *cookieJar {
-	return &cookieJar{cookies: make(map[string][]*http.Cookie)}
-}
-
-func (j *cookieJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	j.cookies[u.Host] = cookies
-}
-
-func (j *cookieJar) Cookies(u *url.URL) []*http.Cookie {
-	j.mu.Lock()
-	defer j.mu.Unlock()
-	return j.cookies[u.Host]
 }
 
 func parseJSON(r io.Reader, v any) error {
