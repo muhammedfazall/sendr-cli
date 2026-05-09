@@ -6,3 +6,5 @@ sendr.exe
 *.exe
 *.out
 *.bin
+
+dist/

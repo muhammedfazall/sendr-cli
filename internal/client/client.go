@@ -176,14 +176,28 @@ func (c *Client) SendEmail(to, subject, body string) (*SendEmailResponse, error)
 	return &result, nil
 }
 
-func (c *Client) GetJob(id string) (map[string]any, error) {
+// JobStatus holds the delivery state of a queued email job.
+type JobStatus struct {
+	ID        string `json:"id"`
+	Status    string `json:"status"`
+	Retries   int    `json:"retries"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+// Done reports whether the job has reached a terminal state.
+func (j *JobStatus) Done() bool {
+	return j.Status == "sent" || j.Status == "failed"
+}
+
+func (c *Client) GetJob(id string) (*JobStatus, error) {
 	data, _, err := c.do("GET", "/emails/"+id, nil, true)
 	if err != nil {
 		return nil, err
 	}
-	var result map[string]any
+	var result JobStatus
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
-	return result, nil
+	return &result, nil
 }
