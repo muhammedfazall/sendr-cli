@@ -87,7 +87,7 @@ var keysListCmd = &cobra.Command{
 				k.ID,
 				k.Name,
 				"mk_live_"+k.Prefix+"...",
-				k.CreatedAt[:10],
+				dateOnly(k.CreatedAt),
 			)
 		}
 		fmt.Println()

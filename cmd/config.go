@@ -39,7 +39,7 @@ var configViewCmd = &cobra.Command{
 			fail("Could not load config: %s", err)
 		}
 
-		color.HiBlack("api_url: ") 
+		color.HiBlack("api_url: ")
 		color.HiWhite("  %s", cfg.APIURL)
 
 		color.HiBlack("logged_in:")
@@ -51,7 +51,7 @@ var configViewCmd = &cobra.Command{
 
 		color.HiBlack("api_key:")
 		if cfg.APIKey != "" {
-			color.HiWhite("  %s...", cfg.APIKey[:20])
+			color.HiWhite("  %s", truncateEnd(cfg.APIKey, 20))
 		} else {
 			color.Red("  not set")
 		}

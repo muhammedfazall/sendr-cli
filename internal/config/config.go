@@ -68,6 +68,5 @@ func (c *Config) Save() error {
 
 func (c *Config) Clear() error {
 	c.Token = ""
-	c.APIKey = ""
 	return c.Save()
 }

@@ -4,7 +4,7 @@ A command-line tool for the [Sendr](https://github.com/muhammedfazall/Sendr) tra
 
 ## Installation
 
-**Requirements:** Go 1.21+
+**Requirements:** Go 1.25+
 
 ```bash
 go install github.com/muhammedfazall/sendr-cli@latest
@@ -23,7 +23,7 @@ go build -o sendr main.go
 ## Quick Start
 
 ```bash
-# 1. Point CLI to your Sendr backend (skip if using default localhost)
+# 1. Point CLI to your Sendr backend (skip if using the hosted default)
 sendr config set-url https://your-backend.com
 
 # 2. Authenticate
@@ -39,6 +39,16 @@ sendr send --to user@example.com --subject "Hello" --body "Hello from sendr-cli"
 ---
 
 ## Commands
+
+### Version
+
+```bash
+sendr --version
+```
+
+Prints the CLI version embedded during release builds.
+
+---
 
 ### Authentication
 
@@ -73,7 +83,8 @@ sendr send --to <email> --subject <subject> --body <body>
 |------|----------|-------------|
 | `--to` | Yes | Recipient email address |
 | `--subject` | Yes | Email subject line |
-| `--body` | Yes | Email body (plain text) |
+| `--body` | Yes | Email body (plain text), or `@path/to/file.txt` |
+| `--no-wait` | No | Return after queuing instead of polling delivery status |
 
 **Example:**
 
@@ -114,7 +125,7 @@ sendr keys revoke <key-id>
 ### Configuration
 
 #### `sendr config set-url <url>`
-Sets the Sendr backend API URL. Defaults to `http://localhost:8080`. Use this if you are self-hosting Sendr.
+Sets the Sendr backend API URL. Defaults to `https://api.sendr.app`. Use this if you are self-hosting Sendr.
 
 ```bash
 sendr config set-url https://your-backend.com
@@ -133,6 +144,7 @@ sendr config view
 
 - `sendr login` starts a local HTTP server, opens your browser to the backend OAuth URL, and captures the token when Google redirects back.
 - Credentials are stored in `~/.config/sendr/config.json`.
+- `sendr logout` clears the login token but keeps the saved API key for future sends.
 - `sendr send` authenticates requests using your stored API key.
 - Emails are queued in the backend and delivered asynchronously via SendGrid with automatic retries.
 
@@ -144,7 +156,7 @@ Stored at `~/.config/sendr/config.json`:
 
 ```json
 {
-  "api_url": "http://localhost:8080",
+  "api_url": "https://api.sendr.app",
   "token": "<jwt>",
   "api_key": "mk_live_..."
 }

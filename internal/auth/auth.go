@@ -2,9 +2,7 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"os/exec"
@@ -27,9 +25,10 @@ func Login(apiURL string) (string, error) {
 	}
 	port := listener.Addr().(*net.TCPAddr).Port
 
-	server := &http.Server{}
+	mux := http.NewServeMux()
+	server := &http.Server{Handler: mux}
 
-	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		if token == "" {
 			errCh <- fmt.Errorf("no token in callback")
@@ -87,8 +86,4 @@ func openBrowser(url string) error {
 	}
 
 	return exec.Command(cmd, args...).Start()
-}
-
-func parseJSON(r io.Reader, v any) error {
-	return json.NewDecoder(r).Decode(v)
 }
