@@ -146,7 +146,7 @@ sendr config view
 - Credentials are stored in `~/.config/sendr/config.json`.
 - `sendr logout` clears the login token but keeps the saved API key for future sends.
 - `sendr send` authenticates requests using your stored API key.
-- Emails are queued in the backend and delivered asynchronously via SendGrid with automatic retries.
+- Emails are queued in the backend and delivered asynchronously via the configured provider (SendGrid by default) with automatic retries.
 
 ---
 
